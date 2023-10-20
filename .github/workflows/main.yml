@@ -1,0 +1,45 @@
+name: Download and Commit
+
+on:
+  schedule:
+    - cron: '5 */3 * * *'
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  download-and-commit:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'  # 选择 Python 版本
+
+    - name: Install requests library
+      run: |
+        pip install requests feedparser
+
+    - name: Set Environment Variables
+      env:
+        NUMIP: ${{ secrets.NUMIP }}
+        TOKEN: ${{ secrets.TOKEN }}
+        DB_URL: ${{ secrets.DB_URL }}
+      run: |
+        echo "NUMIP=${NUMIP}" >> $GITHUB_ENV
+        echo "TOKEN=${TOKEN}" >> $GITHUB_ENV
+        echo "DB_URL=${DB_URL}" >> $GITHUB_ENV
+
+    - name: Download File
+      run: python main.py  # 这里 main.py 负责下载文件
+
+    - name: Commit and Push
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add .
+        git commit -m "Downloaded file on $(date "+%Y/%m/%d %H:%M:%S")"
+        git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{github.repository}}.git
+        git push
