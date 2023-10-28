@@ -4,9 +4,52 @@ import zipfile
 
 import shutil
 import os
+import re
 
 import feedparser
 import subprocess
+import os
+import requests
+import re
+
+
+def process_fofa_file(url, output_file="merge-ip.txt"):
+  # 下载文件
+  response = requests.get(url)
+  if response.status_code != 200:
+    print("无法下载文件")
+    return
+
+  data = response.text
+
+  # 提取IP地址和端口号
+  result = []
+  lines = data.split('\n')
+  for line in lines:
+    line = line.strip()
+    if not line:
+      continue
+
+    # 去掉http://和https://
+    line = re.sub(r'^https?://', '', line)
+
+    # 如果没有端口号，使用默认端口
+    if ':' not in line:
+      line = f"{line}:443"  # 默认端口为443
+
+    # 提取IP地址和端口号
+    ip_port = line.split(':')
+    if len(ip_port) == 2:
+      ip, port = ip_port
+      if re.match(r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}', ip):
+        result.append(f"{ip} {port}")
+
+  # 输出处理后的内容add到output file
+  with open(output_file, "a") as output_file:
+    for item in result:
+      output_file.write(item + "\n")
+
+  print("处理完成，fofa结果已保存到" + output_file.name)
 
 
 def getdb_append_to_file(program_path, data_file, merge_file):
@@ -259,5 +302,12 @@ if __name__ == "__main__":
     data_file = "db-data.txt"
     merge_file = "merge-ip.txt"
     getdb_append_to_file(program_path, data_file, merge_file)
+    # # 从环境变量中获取fofa api URL
+    fofa_url = os.environ.get("FOFA_URL")
+
+    if url:
+      process_fofa_file(url)
+    else:
+      print("未找到FOFA_URL环境变量")
     # file_path = 'merge-ip.txt'
     remove_duplicate_lines(output_file)
