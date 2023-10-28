@@ -28,11 +28,13 @@ jobs:
         TOKEN: ${{ secrets.TOKEN }}
         DB_URL: ${{ secrets.DB_URL }}
         FOFA_URL: ${{ secrets.FOFA_URL }}
+        RSS_URL: ${{ secrets.RSS_URL }}
       run: |
         echo "NUMIP=${NUMIP}" >> $GITHUB_ENV
         echo "TOKEN=${TOKEN}" >> $GITHUB_ENV
         echo "DB_URL=${DB_URL}" >> $GITHUB_ENV
         echo "FOFA_URL=${FOFA_URL}" >> $GITHUB_ENV
+        echo "RSS_URL=${RSS_URL}" >> $GITHUB_ENV
 
     - name: Download File
       run: python main.py  # 这里 main.py 负责下载文件
