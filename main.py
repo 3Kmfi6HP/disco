@@ -305,8 +305,8 @@ if __name__ == "__main__":
     # # 从环境变量中获取fofa api URL
     fofa_url = os.environ.get("FOFA_URL")
 
-    if url:
-      process_fofa_file(url)
+    if fofa_url:
+      process_fofa_file(fofa_url)
     else:
       print("未找到FOFA_URL环境变量")
     # file_path = 'merge-ip.txt'
