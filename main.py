@@ -291,7 +291,7 @@ if __name__ == "__main__":
     output_file = 'merge-ip.txt'
     download_and_convert(url, output_file)
     # 指定RSS订阅的URL和输出文件名
-    rss_url = "https://rsshub.app/telegram/channel/cf_noip?searchQuery=IP"
+    rss_url = os.environ.get("RSS_URL")
     # output_file = "ip_port.txt"
     # 调用函数
     extract_ip_port_from_rss(rss_url, output_file)
