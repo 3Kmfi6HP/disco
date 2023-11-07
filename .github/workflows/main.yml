@@ -2,7 +2,7 @@ name: Download and Commit
 
 on:
   schedule:
-    - cron: '5 */3 * * *'
+    - cron: '5 */2 * * *'
   workflow_dispatch:  # 允许手动触发
 
 jobs:
