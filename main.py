@@ -108,7 +108,7 @@ def extract_ip_port_from_rss(url, output_file):
         port = title[port_start:port_end].strip()
 
         # 写入IP和Port到文件中
-        f.write(f"{ip}  {port}\n")
+        f.write(f"{ip} {port}\n")
 
     print(f"提取完成，并已写入文件：{output_file}")
   except Exception as e:
@@ -131,7 +131,7 @@ def download_and_convert(url, output_file):
       parts = line.split(',')
       if len(parts) == 3:
         ip, port, _ = parts
-        converted_data.append(f"{ip}  {port}")
+        converted_data.append(f"{ip} {port}")
 
     # 追加转换后的数据到输出文件
     with open(output_file, 'a') as outfile:
@@ -200,7 +200,7 @@ def merge_ip_files():
         for line in ip_input:
           line = line.strip()
           if line:  # Skip empty lines
-            ip_port = f'{line}  {port}'
+            ip_port = f'{line} {port}'
             if ip_port not in unique_ips:
               unique_ips.add(ip_port)
               ip_output.write(f'{ip_port}\n')
