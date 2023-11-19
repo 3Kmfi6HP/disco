@@ -20,7 +20,7 @@ jobs:
 
     - name: Install requests library
       run: |
-        pip install requests feedparser
+        pip install requests feedparser pymongo
 
     - name: Set Environment Variables
       env:
