@@ -3,82 +3,9 @@ import requests
 import zipfile
 
 import shutil
-# import os
-
-# import re
+from pymongo import MongoClient
 
 import feedparser
-
-# import subprocess
-
-# def process_fofa_file(url, output_file="merge-ip.txt"):
-#     """
-#     Downloads a file from the given URL and processes it.
-
-#     Parameters:
-#     - url (str): The URL of the file to be downloaded.
-#     - output_file (str): The name of the output file (default is "merge-ip.txt").
-
-#     Returns:
-#     None
-#     """
-#     response = requests.get(url)
-#     # Add your processing logic here
-
-#     if response.status_code != 200:
-#         print("无法下载文件")
-#         return
-
-#     data = response.text
-
-#     # 提取IP地址和端口号
-#     result = []
-#     lines = data.split("\n")
-#     for line in lines:
-#         line = line.strip()
-#         if not line:
-#             continue
-
-#         # 去掉http://和https://
-#         line = re.sub(r"^https?://", "", line)
-
-#         # 如果没有端口号，使用默认端口
-#         if ":" not in line:
-#             line = f"{line}:443"  # 默认端口为443
-
-#         # 提取IP地址和端口号
-#         ip_port = line.split(":")
-#         if len(ip_port) == 2:
-#             ip, port = ip_port
-#             if re.match(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}", ip):
-#                 result.append(f"{ip} {port}")
-
-#     # 输出处理后的内容add到output file
-#     with open(output_file, "a") as output_file:
-#         for item in result:
-#             output_file.write(item + "\n")
-
-#     print("处理完成，fofa结果已保存到" + output_file.name)
-
-# def getdb_append_to_file(program_path, data_file, merge_file):
-#     # 添加可执行权限
-#     try:
-#         subprocess.run(["chmod", "+x", program_path], check=True)
-#     except subprocess.CalledProcessError as e:
-#         print(f"Error changing permissions for {program_path}: {e}")
-#         return
-#     try:
-#         subprocess.run([program_path], check=True)
-#         with open(data_file, "r") as data_file_obj:
-#             data = data_file_obj.read()
-#         with open(merge_file, "a") as merge_file_obj:
-#             merge_file_obj.write(data)
-#         print(f"DB Data from {data_file} has been appended to {merge_file}")
-#         # 移除data_file文件
-#         os.remove(data_file)
-#         # print(f"{data_file} has been removed.")
-#     except subprocess.CalledProcessError as e:
-#         print(f"Error running {program_path}: {e}")
 
 
 def remove_duplicate_lines(file_path):
@@ -286,26 +213,41 @@ def merge_ip_files():
             os.remove(ip_file)  # Delete the original txt file
 
 
-# def merge_ip_files2():
-#     ip_files = []
-#     for file_name in os.listdir():
-#         if file_name.endswith(".txt") and len(file_name.split("-")) == 3:
-#             ip_files.append(file_name)
+def save_to_txt(file_path, database, collection, custom_filter=None, projection=None):
+    """
+    Save data from a MongoDB collection to a text file.
 
-#     unique_ips = set()
-#     with open("merge-ip2.txt", "w") as ip_output:
-#         for ip_file in ip_files:
-#             ip_parts = ip_file.split("-")
-#             ip = ip_parts[0]
-#             port = ip_parts[2].split(".")[0]  # Remove .txt extension
-#             with open(ip_file, "r") as ip_input:
-#                 for line in ip_input:
-#                     line = line.strip()
-#                     if line:  # Skip empty lines
-#                         ip_port = f"{line}:{port}"
-#                         if ip_port not in unique_ips:
-#                             unique_ips.add(ip_port)
-#                             ip_output.write(f"{ip_port}\n")
+    Parameters:
+    - file_path (str): The path to the text file where data will be saved.
+    - database (str): The name of the MongoDB database.
+    - collection (str): The name of the MongoDB collection.
+    - custom_filter (dict, optional): A custom filter for querying data.
+    - projection (dict, optional): A projection for selecting specific fields (default is None).
+
+    Returns:
+    None
+    """
+
+    if custom_filter is None:
+        custom_filter = {}
+    if projection is None:
+        projection = {"_id": 0, "ip": 1, "port": 1}
+    # Rest of the code remains the same
+
+    # Connect to MongoDB
+    client = MongoClient(os.environ.get("DB_URL"))
+
+    # Retrieve data from MongoDB
+    result = client[database][collection].find(filter=filter, projection=projection)
+
+    # Open the file in write mode
+    with open(file_path, "a", encoding="utf-8") as file:
+        # Iterate through the result and write ip and port to the file
+        for entry in result:
+            file.write(f"{entry['ip']} {entry['port']}\n")
+
+    print(f"Data has been saved to {file_path}")
+
 
 if __name__ == "__main__":
     url = "https://zip.baipiao.eu.org"  # 修改为你需要下载的压缩文件的 URL
@@ -363,33 +305,31 @@ if __name__ == "__main__":
 
         print("格式转换完成！输出文件名:", output_file)
 
+        # Remove the file at save_path2
         os.remove(save_path2)
+
+        # Remove the file at output_file
         os.remove(output_file)
+
+        # Remove the directory "cloudflare-better-ip-main" and its contents
         shutil.rmtree("cloudflare-better-ip-main")
-        # merge_ip_files2()
+
+        # Call the function to merge IP files
         merge_ip_files()
-        # 使用示例：下载并转换数据
+
+        # Example of usage: Download and convert data
         cfno1_url = "https://sub.cfno1.eu.org/pure"
         output_file = "merge-ip.txt"
         download_and_convert(cfno1_url, output_file)
-        # 指定RSS订阅的URL和输出文件名
-        rss_url = os.environ.get("RSS_URL")
-        # output_file = "ip_port.txt"
-        # 调用函数
-        extract_ip_port_from_rss(rss_url, output_file)
-        # 使用示例，相同文件名作为输入和输出
-        # getting cf ips from db sec
-        # # 示例用法
-        # program_path = "./cfip_db_linux_x64"
-        # data_file = "db-data.txt"
-        # merge_file = "merge-ip.txt"
-        # getdb_append_to_file(program_path, data_file, merge_file)
-        # # 从环境变量中获取fofa api URL
-        # fofa_url = os.environ.get("FOFA_URL")
 
-        # if fofa_url:
-        #     process_fofa_file(fofa_url)
-        # else:
-        #     print("未找到FOFA_URL环境变量")
-        # file_path = 'merge-ip.txt'
+        # Specify the RSS subscription URL using an environment variable
+        rss_url = os.environ.get("RSS_URL")
+
+        # Extract IP and port information from the specified RSS feed and save to output_file
+        extract_ip_port_from_rss(rss_url, output_file)
+
+        # Save the extracted data to a text file with specified prefixes and directory
+        save_to_txt(output_file, "best_ip", "results")
+
+        # Remove duplicate lines from the output_file
         remove_duplicate_lines(output_file)
