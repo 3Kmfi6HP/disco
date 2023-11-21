@@ -9,6 +9,7 @@ python = ">=3.10.0,<3.11"
 requests = "^2.31.0"
 feedparser = "^6.0.10"
 pymongo = "^4.6.0"
+cryptography = "^41.0.5"
 
 [tool.pyright]
 # https://github.com/microsoft/pyright/blob/main/docs/configuration.md
