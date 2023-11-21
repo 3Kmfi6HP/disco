@@ -37,12 +37,12 @@ def save_text_to_file(text, filename):
 
 
 def save_key_to_file(key, filename):
-    with open(filename, "wb", encoding="utf-8") as file:
+    with open(filename, "wb") as file:
         file.write(key)
 
 
 def read_key_from_file(filename):
-    with open(filename, "rb", encoding="utf-8") as file:
+    with open(filename, "rb") as file:
         return file.read()
 
 
