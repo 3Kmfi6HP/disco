@@ -357,9 +357,9 @@ if __name__ == "__main__":
 
         extract_ip_port_from_rss(rss_url, output_file)
 
-        extract_ip_port_from_fofa(os.environ.get("FOFA_URL"), output_file)
+        # extract_ip_port_from_fofa(os.environ.get("FOFA_URL"), output_file)
 
-        save_to_txt(output_file, "best_ip", "results")
+        # save_to_txt(output_file, "best_ip", "results")
 
         remove_duplicate_lines(output_file)
 
